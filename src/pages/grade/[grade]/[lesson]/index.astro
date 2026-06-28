@@ -1,0 +1,230 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { lessons, getLesson, grades } from '../../../../data/lessons';
+import Pendulum from '../../../../components/experiments/Pendulum.svelte';
+import Magnets from '../../../../components/experiments/Magnets.svelte';
+import ProjectileMotion from '../../../../components/experiments/ProjectileMotion.svelte';
+import Waves from '../../../../components/experiments/Waves.svelte';
+import SoundWaves from '../../../../components/experiments/SoundWaves.svelte';
+import LightRefraction from '../../../../components/experiments/LightRefraction.svelte';
+import Circuits from '../../../../components/experiments/Circuits.svelte';
+import DoubleSlit from '../../../../components/experiments/DoubleSlit.svelte';
+
+export function getStaticPaths() {
+  return lessons.map((l) => ({
+    params: { grade: String(l.grade), lesson: l.slug },
+  }));
+}
+
+const { grade, lesson: lessonSlug } = Astro.params;
+const lesson = getLesson(Number(grade), lessonSlug!);
+if (!lesson) return Astro.redirect('/');
+
+const experimentComponents: Record<string, any> = {
+  pendulum: Pendulum,
+  magnets: Magnets,
+  'projectile-motion': ProjectileMotion,
+  waves: Waves,
+  'sound-waves': SoundWaves,
+  'light-refraction': LightRefraction,
+  circuits: Circuits,
+  'double-slit': DoubleSlit,
+};
+
+const ExperimentComponent = experimentComponents[lesson.slug];
+
+const lessonContent: Record<string, { intro: { de: string; en: string }; observations: { de: string[]; en: string[] }; challenge: { de: string; en: string } }> = {
+  magnets: {
+    intro: {
+      de: 'Magnete üben Kräfte aufeinander aus – ohne sich zu berühren! In diesem Experiment kannst du sehen, wie das Magnetfeld zwischen zwei Magneten aussieht und wie sich die Kraft mit dem Abstand ändert.',
+      en: 'Magnets exert forces on each other – without touching! In this experiment, you can see what the magnetic field between two magnets looks like and how the force changes with distance.',
+    },
+    observations: {
+      de: ['Die Feldlinien verlaufen von N nach S', 'Je näher die Magnete, desto stärker die Kraft', 'Gleiche Pole stoßen sich ab, ungleiche ziehen sich an'],
+      en: ['Field lines run from N to S', 'The closer the magnets, the stronger the force', 'Like poles repel, unlike poles attract'],
+    },
+    challenge: {
+      de: 'Versuche den Magneten so nah wie möglich zu bringen. Bei welchem Abstand verdoppelt sich die Kraft?',
+      en: 'Try bringing the magnet as close as possible. At what distance does the force double?',
+    },
+  },
+  'sound-waves': {
+    intro: {
+      de: 'Schall breitet sich als Druckwelle aus. Die Geschwindigkeit hängt vom Medium ab – in Stahl ist Schall fast 20-mal schneller als in Luft!',
+      en: 'Sound propagates as a pressure wave. The speed depends on the medium – in steel, sound is nearly 20 times faster than in air!',
+    },
+    observations: {
+      de: ['Höhere Frequenz = kürzere Wellenlänge', 'Schall braucht ein Medium (kein Schall im Vakuum)', 'In dichteren Materialien ist Schall schneller'],
+      en: ['Higher frequency = shorter wavelength', 'Sound needs a medium (no sound in vacuum)', 'Sound is faster in denser materials'],
+    },
+    challenge: {
+      de: 'Stelle die Frequenz auf 1000 Hz und vergleiche die Wellenlängen in allen drei Medien!',
+      en: 'Set the frequency to 1000 Hz and compare wavelengths in all three media!',
+    },
+  },
+  'light-refraction': {
+    intro: {
+      de: 'Wenn Licht von einem Medium in ein anderes übergeht, ändert es seine Richtung. Dieses Phänomen erklärt, warum ein Strohhalm im Wasserglas geknickt aussieht!',
+      en: 'When light passes from one medium to another, it changes direction. This phenomenon explains why a straw in a glass of water looks bent!',
+    },
+    observations: {
+      de: ['Licht bricht zum Lot hin, wenn es in ein dichteres Medium eintritt', 'Bei flachem Winkel kann Totalreflexion auftreten', 'Das Snellius-Gesetz: n₁·sin(θ₁) = n₂·sin(θ₂)'],
+      en: ['Light bends toward the normal when entering a denser medium', 'At shallow angles, total internal reflection can occur', "Snell's law: n₁·sin(θ₁) = n₂·sin(θ₂)"],
+    },
+    challenge: {
+      de: 'Finde den Grenzwinkel für Totalreflexion, wenn Licht von Glas (n=1.5) in Luft übergeht!',
+      en: 'Find the critical angle for total internal reflection when light goes from glass (n=1.5) to air!',
+    },
+  },
+  circuits: {
+    intro: {
+      de: 'In einem geschlossenen Stromkreis fließen Elektronen von Minus nach Plus. Der Widerstand bestimmt, wie viel Strom fließt – das ist das Ohmsche Gesetz!',
+      en: 'In a closed circuit, electrons flow from negative to positive. The resistance determines how much current flows – that is Ohm\'s Law!',
+    },
+    observations: {
+      de: ['Mehr Spannung = mehr Strom (bei gleichem Widerstand)', 'Mehr Widerstand = weniger Strom', 'Die Lampe leuchtet heller bei mehr Strom'],
+      en: ['More voltage = more current (at same resistance)', 'More resistance = less current', 'The bulb glows brighter with more current'],
+    },
+    challenge: {
+      de: 'Welchen Widerstand brauchst du, damit bei 9V genau 20mA fließen?',
+      en: 'What resistance do you need for exactly 20mA at 9V?',
+    },
+  },
+  pendulum: {
+    intro: {
+      de: 'Ein Pendel schwingt hin und her – aber was bestimmt wie schnell? Ziehe das Pendel auf verschiedene Höhen und beobachte, wie sich potentielle in kinetische Energie umwandelt.',
+      en: 'A pendulum swings back and forth – but what determines how fast? Pull the pendulum to different heights and observe how potential energy converts to kinetic energy.',
+    },
+    observations: {
+      de: ['Die Schwingungsdauer hängt nur von der Länge ab', 'Am tiefsten Punkt ist die Geschwindigkeit maximal', 'Die Gesamtenergie bleibt (fast) konstant'],
+      en: ['The period depends only on length', 'At the lowest point, velocity is maximum', 'Total energy remains (nearly) constant'],
+    },
+    challenge: {
+      de: 'Finde die Pendellänge, bei der eine Schwingung genau 1 Sekunde dauert!',
+      en: 'Find the pendulum length where one oscillation takes exactly 1 second!',
+    },
+  },
+  waves: {
+    intro: {
+      de: 'Wellen sind überall – Schall, Licht, Wasser. Hier kannst du sehen, was passiert, wenn sich zwei Wellen überlagern: Konstruktive und destruktive Interferenz.',
+      en: 'Waves are everywhere – sound, light, water. Here you can see what happens when two waves overlap: constructive and destructive interference.',
+    },
+    observations: {
+      de: ['Gleiche Phase = Verstärkung (konstruktiv)', 'Gegenphasig (180°) = Auslöschung (destruktiv)', 'Die Überlagerung ist die Summe beider Wellen'],
+      en: ['Same phase = amplification (constructive)', 'Opposite phase (180°) = cancellation (destructive)', 'The superposition is the sum of both waves'],
+    },
+    challenge: {
+      de: 'Stelle die Phasenverschiebung so ein, dass sich die Wellen komplett auslöschen!',
+      en: 'Set the phase shift so that the waves completely cancel each other!',
+    },
+  },
+  'projectile-motion': {
+    intro: {
+      de: 'Wenn du einen Ball wirfst, folgt er einer Parabel. Geschwindigkeit und Winkel bestimmen, wie weit und wie hoch er fliegt. Finde die optimalen Einstellungen!',
+      en: 'When you throw a ball, it follows a parabola. Speed and angle determine how far and high it flies. Find the optimal settings!',
+    },
+    observations: {
+      de: ['45° ergibt die größte Reichweite', 'Doppelte Geschwindigkeit = vierfache Reichweite', 'Die horizontale Geschwindigkeit bleibt konstant'],
+      en: ['45° gives maximum range', 'Double speed = quadruple range', 'Horizontal velocity stays constant'],
+    },
+    challenge: {
+      de: 'Welche Kombination aus Winkel und Geschwindigkeit ergibt genau 100m Reichweite?',
+      en: 'What combination of angle and speed gives exactly 100m range?',
+    },
+  },
+  'double-slit': {
+    intro: {
+      de: 'Das berühmteste Experiment der Quantenphysik! Schicke Wellen oder Teilchen durch zwei Spalte und beobachte das Interferenzmuster – selbst einzelne Teilchen verhalten sich wie Wellen!',
+      en: 'The most famous experiment in quantum physics! Send waves or particles through two slits and observe the interference pattern – even individual particles behave like waves!',
+    },
+    observations: {
+      de: ['Wellen erzeugen ein Interferenzmuster auf dem Schirm', 'Im Teilchen-Modus baut sich das Muster langsam auf', 'Engere Spalte = breiteres Muster'],
+      en: ['Waves create an interference pattern on the screen', 'In particle mode, the pattern builds up slowly', 'Narrower slits = wider pattern'],
+    },
+    challenge: {
+      de: 'Aktiviere den Teilchen-Modus und beobachte: Wie viele Teilchen brauchst du, bis das Interferenzmuster erkennbar ist?',
+      en: 'Activate particle mode and observe: How many particles do you need until the interference pattern becomes visible?',
+    },
+  },
+};
+
+const content = lessonContent[lesson.slug];
+---
+
+<Layout title={`${lesson.title.de} – Explore Physics`}>
+  <a href={`/grade/${grade}/`} class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_lessons">← Zurück zur Übersicht</a>
+
+  <h1 class="text-3xl font-bold mb-3" data-lesson-title>
+    {lesson.title.de}
+  </h1>
+
+  {content && (
+    <p class="text-slate-300 mb-8 max-w-2xl text-lg" data-lesson-intro>
+      {content.intro.de}
+    </p>
+  )}
+
+  {ExperimentComponent && (
+    <div class="mb-8">
+      {lesson.slug === 'magnets' && <Magnets client:visible />}
+      {lesson.slug === 'sound-waves' && <SoundWaves client:visible />}
+      {lesson.slug === 'light-refraction' && <LightRefraction client:visible />}
+      {lesson.slug === 'circuits' && <Circuits client:visible />}
+      {lesson.slug === 'pendulum' && <Pendulum client:visible />}
+      {lesson.slug === 'waves' && <Waves client:visible />}
+      {lesson.slug === 'projectile-motion' && <ProjectileMotion client:visible />}
+      {lesson.slug === 'double-slit' && <DoubleSlit client:visible />}
+    </div>
+  )}
+
+  {!ExperimentComponent && (
+    <div class="bg-slate-800 rounded-2xl p-12 border border-slate-700 text-center mb-8">
+      <p class="text-slate-400 text-lg">🔬 Experiment kommt bald...</p>
+    </div>
+  )}
+
+  {content && (
+    <div class="grid md:grid-cols-2 gap-6 mt-8">
+      <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <h2 class="text-lg font-semibold text-emerald-400 mb-3" data-i18n="observations">Beobachtungen</h2>
+        <ul class="space-y-2" data-observations>
+          {content.observations.de.map((obs) => (
+            <li class="text-slate-300 flex gap-2">
+              <span class="text-emerald-400">•</span> {obs}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <h2 class="text-lg font-semibold text-amber-400 mb-3" data-i18n="challenge">Herausforderung</h2>
+        <p class="text-slate-300" data-challenge>{content.challenge.de}</p>
+      </div>
+    </div>
+  )}
+</Layout>
+
+<script is:inline define:vars={{ lesson, content }}>
+  (function() {
+    const lang = localStorage.getItem('lang') || 'de';
+    if (lang === 'en') {
+      const titleEl = document.querySelector('[data-lesson-title]');
+      if (titleEl) titleEl.textContent = lesson.title.en;
+      const introEl = document.querySelector('[data-lesson-intro]');
+      if (introEl && content) introEl.textContent = content.intro.en;
+      const obsEl = document.querySelector('[data-observations]');
+      if (obsEl && content) {
+        obsEl.innerHTML = content.observations.en.map(o => `<li class="text-slate-300 flex gap-2"><span class="text-emerald-400">•</span> ${o}</li>`).join('');
+      }
+      const challengeEl = document.querySelector('[data-challenge]');
+      if (challengeEl && content) challengeEl.textContent = content.challenge.en;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const map = { observations: 'Observations', challenge: 'Challenge' };
+        const key = el.getAttribute('data-i18n');
+        if (map[key]) el.textContent = map[key];
+      });
+      document.querySelectorAll('[data-i18n-link]').forEach(el => {
+        el.textContent = '← Back to lessons';
+      });
+    }
+  })();
+</script>

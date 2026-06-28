@@ -1,0 +1,16 @@
+{
+  "site_title": "Explore Physics",
+  "site_subtitle": "Experience physics interactively",
+  "nav_home": "Home",
+  "nav_grades": "Grades",
+  "choose_grade": "Choose your grade",
+  "lessons": "Experiments",
+  "back_to_grades": "← Back to grades",
+  "back_to_lessons": "← Back to lessons",
+  "start_experiment": "Start experiment",
+  "reset": "Reset",
+  "observations": "Observations",
+  "challenge": "Challenge",
+  "grade": "Grade",
+  "lang_toggle": "Deutsch"
+}

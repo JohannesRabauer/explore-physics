@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { grades } from '../data/lessons';
+---
+
+<Layout title="Explore Physics">
+  <section class="text-center mb-12">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+      <span data-i18n="site_title">Explore Physics</span>
+    </h1>
+    <p class="text-lg text-slate-400" data-i18n="site_subtitle">Physik interaktiv erleben</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold mb-6 text-center" data-i18n="choose_grade">Wähle deine Klassenstufe</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+      {grades.map((g) => (
+        <a
+          href={`/grade/${g}/`}
+          class="group flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-800 border border-slate-700 hover:border-indigo-500 hover:bg-slate-750 transition-all hover:scale-105"
+        >
+          <span class="text-3xl font-bold text-indigo-400 group-hover:text-indigo-300">{g}</span>
+          <span class="text-sm text-slate-400 mt-1" data-i18n="grade">Klasse</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  (function() {
+    const lang = localStorage.getItem('lang') || 'de';
+    if (lang === 'en') {
+      const map = { site_title: 'Explore Physics', site_subtitle: 'Experience physics interactively', choose_grade: 'Choose your grade', grade: 'Grade' };
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (map[key]) el.textContent = map[key];
+      });
+    }
+  })();
+</script>

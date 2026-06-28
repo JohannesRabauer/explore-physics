@@ -1,0 +1,56 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { grades, getLessonsByGrade } from '../../../data/lessons';
+
+export function getStaticPaths() {
+  return grades.map((g) => ({ params: { grade: String(g) } }));
+}
+
+const grade = Number(Astro.params.grade);
+const gradeLessons = getLessonsByGrade(grade);
+---
+
+<Layout title={`Klasse ${grade} – Explore Physics`}>
+  <a href="/" class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_grades">← Zurück zu den Klassenstufen</a>
+  <h1 class="text-3xl font-bold mb-8">
+    <span data-i18n="grade">Klasse</span> {grade} – <span data-i18n="lessons">Experimente</span>
+  </h1>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    {gradeLessons.map((lesson) => (
+      <a
+        href={`/grade/${grade}/${lesson.slug}/`}
+        class="group p-6 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500 transition-all hover:scale-[1.02]"
+      >
+        <h2 class="text-xl font-semibold text-indigo-300 group-hover:text-indigo-200 mb-2" data-lesson-title={lesson.slug}>
+          {lesson.title.de}
+        </h2>
+        <p class="text-slate-400 text-sm" data-lesson-desc={lesson.slug}>
+          {lesson.description.de}
+        </p>
+      </a>
+    ))}
+  </div>
+</Layout>
+
+<script is:inline define:vars={{ gradeLessons }}>
+  (function() {
+    const lang = localStorage.getItem('lang') || 'de';
+    if (lang === 'en') {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const map = { grade: 'Grade', lessons: 'Experiments' };
+        const key = el.getAttribute('data-i18n');
+        if (map[key]) el.textContent = map[key];
+      });
+      document.querySelectorAll('[data-i18n-link]').forEach(el => {
+        el.textContent = '← Back to grades';
+      });
+      gradeLessons.forEach(l => {
+        const titleEl = document.querySelector(`[data-lesson-title="${l.slug}"]`);
+        const descEl = document.querySelector(`[data-lesson-desc="${l.slug}"]`);
+        if (titleEl) titleEl.textContent = l.title.en;
+        if (descEl) descEl.textContent = l.description.en;
+      });
+    }
+  })();
+</script>

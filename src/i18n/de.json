@@ -1,0 +1,16 @@
+{
+  "site_title": "Explore Physics",
+  "site_subtitle": "Physik interaktiv erleben",
+  "nav_home": "Start",
+  "nav_grades": "Klassenstufen",
+  "choose_grade": "Wähle deine Klassenstufe",
+  "lessons": "Experimente",
+  "back_to_grades": "← Zurück zu den Klassenstufen",
+  "back_to_lessons": "← Zurück zur Übersicht",
+  "start_experiment": "Experiment starten",
+  "reset": "Zurücksetzen",
+  "observations": "Beobachtungen",
+  "challenge": "Herausforderung",
+  "grade": "Klasse",
+  "lang_toggle": "English"
+}
