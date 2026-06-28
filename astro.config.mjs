@@ -5,7 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://explore-physics.github.io',
+  site: 'https://johannesrabauer.github.io',
+  base: '/explore-physics',
   trailingSlash: 'always',
   integrations: [svelte()],
   vite: {
