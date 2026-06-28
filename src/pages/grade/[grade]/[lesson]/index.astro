@@ -9,6 +9,17 @@ import SoundWaves from '../../../../components/experiments/SoundWaves.svelte';
 import LightRefraction from '../../../../components/experiments/LightRefraction.svelte';
 import Circuits from '../../../../components/experiments/Circuits.svelte';
 import DoubleSlit from '../../../../components/experiments/DoubleSlit.svelte';
+import FreeFall from '../../../../components/experiments/FreeFall.svelte';
+import InclinedPlane from '../../../../components/experiments/InclinedPlane.svelte';
+import SpeedDistanceTime from '../../../../components/experiments/SpeedDistanceTime.svelte';
+import FrictionSurface from '../../../../components/experiments/FrictionSurface.svelte';
+import BrakingDistance from '../../../../components/experiments/BrakingDistance.svelte';
+import TerminalVelocity from '../../../../components/experiments/TerminalVelocity.svelte';
+import PlanetaryGravity from '../../../../components/experiments/PlanetaryGravity.svelte';
+import FrictionRace from '../../../../components/experiments/FrictionRace.svelte';
+import Acceleration from '../../../../components/experiments/Acceleration.svelte';
+import OrbitalMechanics from '../../../../components/experiments/OrbitalMechanics.svelte';
+import RollingVsSliding from '../../../../components/experiments/RollingVsSliding.svelte';
 
 export function getStaticPaths() {
   return lessons.map((l) => ({
@@ -29,6 +40,17 @@ const experimentComponents: Record<string, any> = {
   'light-refraction': LightRefraction,
   circuits: Circuits,
   'double-slit': DoubleSlit,
+  'free-fall': FreeFall,
+  'inclined-plane': InclinedPlane,
+  'speed-distance-time': SpeedDistanceTime,
+  'friction-surface': FrictionSurface,
+  'braking-distance': BrakingDistance,
+  'terminal-velocity': TerminalVelocity,
+  'planetary-gravity': PlanetaryGravity,
+  'friction-race': FrictionRace,
+  acceleration: Acceleration,
+  'orbital-mechanics': OrbitalMechanics,
+  'rolling-vs-sliding': RollingVsSliding,
 };
 
 const ExperimentComponent = experimentComponents[lesson.slug];
@@ -146,6 +168,160 @@ const lessonContent: Record<string, { intro: { de: string; en: string }; observa
       en: 'Activate particle mode and observe: How many particles do you need until the interference pattern becomes visible?',
     },
   },
+  'speed-distance-time': {
+    intro: {
+      de: 'Geschwindigkeit ist einfach: Weg geteilt durch Zeit. Aber was bedeutet das konkret? Beobachte einen Läufer und sieh, wie das Weg-Zeit-Diagramm entsteht!',
+      en: 'Speed is simple: distance divided by time. But what does that mean in practice? Watch a runner and see how the distance-time graph forms!',
+    },
+    observations: {
+      de: ['Bei konstanter Geschwindigkeit ist das s-t-Diagramm eine Gerade', 'Doppelte Geschwindigkeit = doppelte Strecke in gleicher Zeit', 's = v · t'],
+      en: ['At constant speed, the s-t graph is a straight line', 'Double speed = double distance in same time', 's = v · t'],
+    },
+    challenge: {
+      de: 'Welche Geschwindigkeit brauchst du, um in 5 Sekunden genau 40m zurückzulegen?',
+      en: 'What speed do you need to cover exactly 40m in 5 seconds?',
+    },
+  },
+  'friction-surface': {
+    intro: {
+      de: 'Schiebe einen Block über verschiedene Oberflächen und beobachte, wie schnell er gebremst wird. Reibung hängt vom Material ab – und bestimmt, wie weit ein Gegenstand rutscht!',
+      en: 'Push a block across different surfaces and observe how quickly it slows down. Friction depends on the material – and determines how far an object slides!',
+    },
+    observations: {
+      de: ['Eis hat fast keine Reibung – der Block gleitet sehr weit', 'Gummi bremst am stärksten', 'Nach dem Loslassen wirkt nur noch die Reibungskraft'],
+      en: ['Ice has almost no friction – the block slides very far', 'Rubber brakes the most', 'After release, only friction force acts'],
+    },
+    challenge: {
+      de: 'Auf welcher Oberfläche kommt der Block nach genau 5m zum Stehen?',
+      en: 'On which surface does the block stop after exactly 5m?',
+    },
+  },
+  'free-fall': {
+    intro: {
+      de: 'Galileo behauptete: Alle Körper fallen gleich schnell – egal wie schwer! Stimmt das? Teste es mit und ohne Luftwiderstand.',
+      en: 'Galileo claimed: All objects fall at the same speed – regardless of weight! Is that true? Test it with and without air resistance.',
+    },
+    observations: {
+      de: ['Ohne Luftwiderstand fallen beide Kugeln gleich schnell', 'Mit Luftwiderstand fällt die leichtere langsamer', 'Die Fallgeschwindigkeit nimmt mit 9.81 m/s² zu'],
+      en: ['Without air resistance both balls fall at the same speed', 'With air resistance the lighter one falls slower', 'Fall speed increases at 9.81 m/s²'],
+    },
+    challenge: {
+      de: 'Aktiviere den Luftwiderstand: Bei welcher Masse fällt die Kugel doppelt so langsam wie bei 10kg?',
+      en: 'Enable air resistance: At what mass does the ball fall twice as slowly as at 10kg?',
+    },
+  },
+  'friction-race': {
+    intro: {
+      de: 'Vier Materialien rutschen eine Rampe hinunter. Wer gewinnt? Die Reibung entscheidet – manche kommen gar nicht ins Rutschen!',
+      en: 'Four materials slide down a ramp. Who wins? Friction decides – some don\'t slide at all!',
+    },
+    observations: {
+      de: ['Je kleiner μ, desto schneller', 'Ist tan(α) < μ, bewegt sich nichts', 'Eis-Kufen haben die geringste Reibung'],
+      en: ['The smaller μ, the faster', 'If tan(α) < μ, nothing moves', 'Ice skates have the least friction'],
+    },
+    challenge: {
+      de: 'Bei welchem Winkel bleibt der Gummiblock (μ=0.7) gerade noch stehen?',
+      en: 'At what angle does the rubber block (μ=0.7) just barely stay put?',
+    },
+  },
+  'inclined-plane': {
+    intro: {
+      de: 'An der schiefen Ebene wirken zwei Kräfte gegeneinander: die Hangabtriebskraft zieht nach unten, die Reibung bremst. Wer gewinnt?',
+      en: 'On an inclined plane, two forces oppose each other: gravity pulls down the slope, friction brakes. Which one wins?',
+    },
+    observations: {
+      de: ['Steilerer Winkel = größere Hangabtriebskraft', 'Mehr Reibung kann die Bewegung komplett verhindern', 'Die Masse kürzt sich bei der Beschleunigung heraus!'],
+      en: ['Steeper angle = greater downhill force', 'More friction can completely prevent motion', 'Mass cancels out in the acceleration!'],
+    },
+    challenge: {
+      de: 'Finde den Winkel, bei dem ein Block mit μ=0.3 gerade anfängt zu rutschen!',
+      en: 'Find the angle where a block with μ=0.3 just starts to slide!',
+    },
+  },
+  'rolling-vs-sliding': {
+    intro: {
+      de: 'Warum benutzen wir Räder statt Kufen? Rollreibung ist viel kleiner als Gleitreibung. Beobachte den Unterschied auf der Rampe!',
+      en: 'Why do we use wheels instead of runners? Rolling friction is much smaller than sliding friction. Observe the difference on the ramp!',
+    },
+    observations: {
+      de: ['Rollende Objekte sind viel schneller als gleitende', 'Rollreibung ist 10-20x kleiner als Gleitreibung', 'Deshalb sind Räder die wichtigste Erfindung der Menschheit!'],
+      en: ['Rolling objects are much faster than sliding ones', 'Rolling friction is 10-20x smaller than sliding friction', 'That\'s why wheels are humanity\'s most important invention!'],
+    },
+    challenge: {
+      de: 'Bei welchem Neigungswinkel ist der Holzklotz genauso schnell wie die Kugel bei 10°?',
+      en: 'At what slope angle is the wooden block as fast as the ball at 10°?',
+    },
+  },
+  'acceleration': {
+    intro: {
+      de: 'Newtons 2. Gesetz: F = m · a. Mehr Kraft = mehr Beschleunigung. Mehr Masse = weniger Beschleunigung. Sieh es in Echtzeit!',
+      en: 'Newton\'s 2nd Law: F = m · a. More force = more acceleration. More mass = less acceleration. See it in real-time!',
+    },
+    observations: {
+      de: ['Doppelte Kraft = doppelte Beschleunigung', 'Doppelte Masse = halbe Beschleunigung', 'Reibung reduziert die effektive Beschleunigung'],
+      en: ['Double force = double acceleration', 'Double mass = half acceleration', 'Friction reduces effective acceleration'],
+    },
+    challenge: {
+      de: 'Welche Kraft brauchst du, um 10kg mit genau 2 m/s² zu beschleunigen (bei μ=0.1)?',
+      en: 'What force do you need to accelerate 10kg at exactly 2 m/s² (with μ=0.1)?',
+    },
+  },
+  'braking-distance': {
+    intro: {
+      de: 'Wie weit fährt ein Auto, nachdem der Fahrer bremst? Der Anhalteweg besteht aus Reaktionsweg und Bremsweg – und wächst quadratisch mit der Geschwindigkeit!',
+      en: 'How far does a car travel after the driver brakes? Stopping distance = reaction distance + braking distance – and it grows with the square of speed!',
+    },
+    observations: {
+      de: ['Doppelte Geschwindigkeit = vierfacher Bremsweg!', 'Reaktionszeit verlängert den Anhalteweg erheblich', 'Nasse Straße (weniger Reibung) = längerer Bremsweg'],
+      en: ['Double speed = quadruple braking distance!', 'Reaction time significantly increases stopping distance', 'Wet road (less friction) = longer braking distance'],
+    },
+    challenge: {
+      de: 'Bei 100 km/h und nasser Straße (μ=0.4): Wie lang ist der Anhalteweg?',
+      en: 'At 100 km/h on a wet road (μ=0.4): How long is the stopping distance?',
+    },
+  },
+  'terminal-velocity': {
+    intro: {
+      de: 'Ohne Luft würde ein Fallschirmspringer immer schneller werden. Aber der Luftwiderstand wächst mit dem Quadrat der Geschwindigkeit – bis ein Gleichgewicht entsteht: die Endgeschwindigkeit!',
+      en: 'Without air, a skydiver would accelerate forever. But air resistance grows with the square of speed – until equilibrium is reached: terminal velocity!',
+    },
+    observations: {
+      de: ['Größere Fläche = niedrigere Endgeschwindigkeit', 'Mehr Masse = höhere Endgeschwindigkeit', 'Die Beschleunigung nimmt immer weiter ab bis sie 0 erreicht'],
+      en: ['Larger area = lower terminal velocity', 'More mass = higher terminal velocity', 'Acceleration decreases until it reaches 0'],
+    },
+    challenge: {
+      de: 'Welche Fläche braucht ein 80kg-Springer für eine Endgeschwindigkeit von 5 m/s (Fallschirm)?',
+      en: 'What area does an 80kg skydiver need for a terminal velocity of 5 m/s (parachute)?',
+    },
+  },
+  'planetary-gravity': {
+    intro: {
+      de: 'Auf dem Mond wiegst du nur 1/6! Auf Jupiter fast 2.5x so viel. Springe auf verschiedenen Planeten und spüre den Unterschied der Schwerkraft.',
+      en: 'On the Moon you weigh only 1/6! On Jupiter almost 2.5x as much. Jump on different planets and feel the difference in gravity.',
+    },
+    observations: {
+      de: ['Auf dem Mond springst du 6x so hoch', 'Dein Gewicht ändert sich, deine Masse nicht', 'g bestimmt sowohl Gewicht als auch Fallbeschleunigung'],
+      en: ['On the Moon you jump 6x higher', 'Your weight changes, your mass doesn\'t', 'g determines both weight and fall acceleration'],
+    },
+    challenge: {
+      de: 'Auf welchem Planeten springst du genau 1m hoch?',
+      en: 'On which planet do you jump exactly 1m high?',
+    },
+  },
+  'orbital-mechanics': {
+    intro: {
+      de: 'Ein Satellit fällt ständig zur Erde – aber er fliegt so schnell zur Seite, dass er immer daran vorbeifällt! Finde die richtige Geschwindigkeit für einen stabilen Orbit.',
+      en: 'A satellite constantly falls toward Earth – but it moves sideways so fast that it always misses! Find the right speed for a stable orbit.',
+    },
+    observations: {
+      de: ['Zu langsam → Absturz', 'Zu schnell → Flucht ins All', 'Die Kreisbahngeschwindigkeit hängt von Masse und Abstand ab'],
+      en: ['Too slow → crash', 'Too fast → escape into space', 'Orbital speed depends on mass and distance'],
+    },
+    challenge: {
+      de: 'Finde die exakte Geschwindigkeit für eine kreisrunde Umlaufbahn!',
+      en: 'Find the exact speed for a perfectly circular orbit!',
+    },
+  },
 };
 
 const content = lessonContent[lesson.slug];
@@ -174,6 +350,17 @@ const content = lessonContent[lesson.slug];
       {lesson.slug === 'waves' && <Waves client:visible />}
       {lesson.slug === 'projectile-motion' && <ProjectileMotion client:visible />}
       {lesson.slug === 'double-slit' && <DoubleSlit client:visible />}
+      {lesson.slug === 'free-fall' && <FreeFall client:visible />}
+      {lesson.slug === 'inclined-plane' && <InclinedPlane client:visible />}
+      {lesson.slug === 'speed-distance-time' && <SpeedDistanceTime client:visible />}
+      {lesson.slug === 'friction-surface' && <FrictionSurface client:visible />}
+      {lesson.slug === 'braking-distance' && <BrakingDistance client:visible />}
+      {lesson.slug === 'terminal-velocity' && <TerminalVelocity client:visible />}
+      {lesson.slug === 'planetary-gravity' && <PlanetaryGravity client:visible />}
+      {lesson.slug === 'friction-race' && <FrictionRace client:visible />}
+      {lesson.slug === 'acceleration' && <Acceleration client:visible />}
+      {lesson.slug === 'orbital-mechanics' && <OrbitalMechanics client:visible />}
+      {lesson.slug === 'rolling-vs-sliding' && <RollingVsSliding client:visible />}
     </div>
   )}
 
