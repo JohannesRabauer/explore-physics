@@ -6,32 +6,24 @@
   let magnetY = $state(200);
   let dragging = $state(false);
   let polarity = $state<'attract' | 'repel'>('attract');
+  let paused = $state(false);
+  let speed = $state(1);
 
   const fixedMagnet = { x: 400, y: 200 };
   const particleCount = 80;
 
-  interface Particle {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-  }
-
+  interface Particle { x: number; y: number; vx: number; vy: number }
   let particles: Particle[] = [];
   let animFrame: number;
 
   function initParticles() {
     particles = Array.from({ length: particleCount }, () => ({
-      x: Math.random() * 600,
-      y: Math.random() * 400,
-      vx: 0,
-      vy: 0,
+      x: Math.random() * 600, y: Math.random() * 400, vx: 0, vy: 0,
     }));
   }
 
   function getForce(px: number, py: number, mx: number, my: number, sign: number) {
-    const dx = mx - px;
-    const dy = my - py;
+    const dx = mx - px, dy = my - py;
     const dist = Math.sqrt(dx * dx + dy * dy) + 10;
     const strength = (sign * 500) / (dist * dist);
     return { fx: strength * (dx / dist), fy: strength * (dy / dist) };
@@ -44,20 +36,23 @@
 
     const sign = polarity === 'attract' ? 1 : -1;
 
-    // Update particles (field lines)
+    if (!paused) {
+      particles.forEach((p) => {
+        const f1 = getForce(p.x, p.y, magnetX, magnetY, 1);
+        const f2 = getForce(p.x, p.y, fixedMagnet.x, fixedMagnet.y, sign);
+        p.vx = (f1.fx + f2.fx) * 2 * speed;
+        p.vy = (f1.fy + f2.fy) * 2 * speed;
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > 600 || p.y < 0 || p.y > 400) {
+          p.x = Math.random() * 600;
+          p.y = Math.random() * 400;
+        }
+      });
+    }
+
+    // Draw particles
     particles.forEach((p) => {
-      const f1 = getForce(p.x, p.y, magnetX, magnetY, 1);
-      const f2 = getForce(p.x, p.y, fixedMagnet.x, fixedMagnet.y, sign);
-      p.vx = (f1.fx + f2.fx) * 2;
-      p.vy = (f1.fy + f2.fy) * 2;
-      p.x += p.vx;
-      p.y += p.vy;
-
-      if (p.x < 0 || p.x > 600 || p.y < 0 || p.y > 400) {
-        p.x = Math.random() * 600;
-        p.y = Math.random() * 400;
-      }
-
       ctx.beginPath();
       ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(99, 102, 241, ${Math.min(1, 1 / (Math.abs(p.vx) + Math.abs(p.vy) + 0.5))})`;
@@ -68,15 +63,38 @@
     drawMagnet(ctx, magnetX, magnetY, 'N', '#ef4444');
     drawMagnet(ctx, fixedMagnet.x, fixedMagnet.y, polarity === 'attract' ? 'S' : 'N', polarity === 'attract' ? '#3b82f6' : '#ef4444');
 
-    // Force indicator
+    // Calculate and display values
     const dx = fixedMagnet.x - magnetX;
     const dy = fixedMagnet.y - magnetY;
     const dist = Math.sqrt(dx * dx + dy * dy);
+    const distCm = (dist / 2).toFixed(0);
     const force = (1000 / (dist * dist)) * 100;
+
+    // Info panel (always visible)
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.fillRect(10, 10, 220, 100);
+    ctx.strokeStyle = '#334155';
+    ctx.strokeRect(10, 10, 220, 100);
+
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('📐 Messwerte:', 20, 30);
+    ctx.font = '12px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px sans-serif';
-    ctx.fillText(`Kraft: ${force.toFixed(1)} N (relativ)`, 20, 380);
-    ctx.fillText(`Abstand: ${(dist / 2).toFixed(0)} cm`, 20, 360);
+    ctx.fillText(`Abstand r = ${distCm} cm`, 20, 50);
+    ctx.fillText(`Kraft F = ${force.toFixed(2)} (relativ)`, 20, 68);
+    ctx.fillStyle = '#eab308';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('⚡ F ∝ 1/r²', 20, 92);
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('(Coulomb-Gesetz)', 100, 92);
+
+    if (paused) {
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('⏸ PAUSIERT', 480, 30);
+    }
 
     animFrame = requestAnimationFrame(step);
   }
@@ -97,55 +115,39 @@
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) * (600 / rect.width);
     const y = (e.clientY - rect.top) * (400 / rect.height);
-    if (Math.abs(x - magnetX) < 35 && Math.abs(y - magnetY) < 20) {
-      dragging = true;
-    }
+    if (Math.abs(x - magnetX) < 35 && Math.abs(y - magnetY) < 20) dragging = true;
   }
-
   function handleMouseMove(e: MouseEvent) {
     if (!dragging) return;
     const rect = canvas.getBoundingClientRect();
     magnetX = Math.max(30, Math.min(570, (e.clientX - rect.left) * (600 / rect.width)));
     magnetY = Math.max(15, Math.min(385, (e.clientY - rect.top) * (400 / rect.height)));
   }
+  function handleMouseUp() { dragging = false; }
 
-  function handleMouseUp() {
-    dragging = false;
-  }
-
-  onMount(() => {
-    canvas.width = 600;
-    canvas.height = 400;
-    initParticles();
-    step();
-    return () => cancelAnimationFrame(animFrame);
-  });
+  onMount(() => { canvas.width = 600; canvas.height = 400; initParticles(); step(); return () => cancelAnimationFrame(animFrame); });
 </script>
 
 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-  <canvas
-    bind:this={canvas}
-    class="w-full max-w-[600px] mx-auto block rounded-lg bg-slate-900 mb-4 cursor-grab"
-    style="aspect-ratio: 3/2;"
-    onmousedown={handleMouseDown}
-    onmousemove={handleMouseMove}
-    onmouseup={handleMouseUp}
-    onmouseleave={handleMouseUp}
-  ></canvas>
+  <canvas bind:this={canvas} class="w-full max-w-[600px] mx-auto block rounded-lg bg-slate-900 mb-4 cursor-grab" style="aspect-ratio: 3/2;"
+    onmousedown={handleMouseDown} onmousemove={handleMouseMove} onmouseup={handleMouseUp} onmouseleave={handleMouseUp}></canvas>
 
-  <div class="flex gap-4 justify-center">
-    <button
-      onclick={() => polarity = 'attract'}
-      class={`px-4 py-2 rounded-lg font-medium transition-colors ${polarity === 'attract' ? 'bg-indigo-600' : 'bg-slate-600 hover:bg-slate-500'}`}
-    >
+  <div class="flex flex-wrap gap-3 justify-center mb-4">
+    <button onclick={() => paused = !paused} class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium transition-colors">
+      {paused ? '▶ Weiter' : '⏸ Pause'}
+    </button>
+    <button onclick={() => polarity = 'attract'} class={`px-4 py-2 rounded-lg font-medium transition-colors ${polarity === 'attract' ? 'bg-indigo-600' : 'bg-slate-600 hover:bg-slate-500'}`}>
       Anziehung (N↔S)
     </button>
-    <button
-      onclick={() => polarity = 'repel'}
-      class={`px-4 py-2 rounded-lg font-medium transition-colors ${polarity === 'repel' ? 'bg-indigo-600' : 'bg-slate-600 hover:bg-slate-500'}`}
-    >
+    <button onclick={() => polarity = 'repel'} class={`px-4 py-2 rounded-lg font-medium transition-colors ${polarity === 'repel' ? 'bg-indigo-600' : 'bg-slate-600 hover:bg-slate-500'}`}>
       Abstoßung (N↔N)
     </button>
   </div>
-  <p class="text-center text-sm text-slate-400 mt-3">Ziehe den roten Magneten mit der Maus!</p>
+  <div class="max-w-sm mx-auto">
+    <label class="flex flex-col gap-1">
+      <span class="text-sm text-slate-400">Geschwindigkeit: {speed === 0.25 ? '¼×' : speed === 0.5 ? '½×' : speed === 1 ? '1×' : '2×'}</span>
+      <input type="range" min="0.25" max="2" step="0.25" bind:value={speed} class="accent-indigo-500" />
+    </label>
+  </div>
+  <p class="text-center text-sm text-slate-400 mt-3">🖱️ Ziehe den roten Magneten mit der Maus!</p>
 </div>
