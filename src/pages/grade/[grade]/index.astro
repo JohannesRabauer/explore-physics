@@ -11,7 +11,7 @@ const gradeLessons = getLessonsByGrade(grade);
 ---
 
 <Layout title={`Klasse ${grade} – Explore Physics`}>
-  <a href="/" class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_grades">← Zurück zu den Klassenstufen</a>
+  <a href={`${import.meta.env.BASE_URL}`} class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_grades">← Zurück zu den Klassenstufen</a>
   <h1 class="text-3xl font-bold mb-8">
     <span data-i18n="grade">Klasse</span> {grade} – <span data-i18n="lessons">Experimente</span>
   </h1>
@@ -19,7 +19,7 @@ const gradeLessons = getLessonsByGrade(grade);
   <div class="grid gap-4 md:grid-cols-2">
     {gradeLessons.map((lesson) => (
       <a
-        href={`/grade/${grade}/${lesson.slug}/`}
+        href={`${import.meta.env.BASE_URL}grade/${grade}/${lesson.slug}/`}
         class="group p-6 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500 transition-all hover:scale-[1.02]"
       >
         <h2 class="text-xl font-semibold text-indigo-300 group-hover:text-indigo-200 mb-2" data-lesson-title={lesson.slug}>

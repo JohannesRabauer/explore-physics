@@ -16,7 +16,7 @@ import { grades } from '../data/lessons';
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
       {grades.map((g) => (
         <a
-          href={`/grade/${g}/`}
+          href={`${import.meta.env.BASE_URL}grade/${g}/`}
           class="group flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-800 border border-slate-700 hover:border-indigo-500 hover:bg-slate-750 transition-all hover:scale-105"
         >
           <span class="text-3xl font-bold text-indigo-400 group-hover:text-indigo-300">{g}</span>

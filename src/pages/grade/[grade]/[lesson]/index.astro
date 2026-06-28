@@ -152,7 +152,7 @@ const content = lessonContent[lesson.slug];
 ---
 
 <Layout title={`${lesson.title.de} – Explore Physics`}>
-  <a href={`/grade/${grade}/`} class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_lessons">← Zurück zur Übersicht</a>
+  <a href={`${import.meta.env.BASE_URL}grade/${grade}/`} class="text-indigo-400 hover:text-indigo-300 text-sm mb-6 inline-block" data-i18n-link="back_to_lessons">← Zurück zur Übersicht</a>
 
   <h1 class="text-3xl font-bold mb-3" data-lesson-title>
     {lesson.title.de}
