@@ -2,156 +2,137 @@
   import { onMount } from 'svelte';
 
   let canvas: HTMLCanvasElement;
-  let slitDistance = $state(40);
-  let wavelength = $state(20);
-  let showParticles = $state(false);
-  let particleCount = $state(0);
-  let particles: { x: number; intensity: number }[] = $state([]);
-  let animFrame: number;
+  let slitDist = $state(0.1);
+  let wavelength = $state(500);
+  let screenDist = $state(2);
+  let paused = $state(false);
+  let simSpeed = $state(1);
   let t = $state(0);
+  let animFrame: number;
 
-  function intensityAt(x: number, screenDist: number): number {
-    const d = slitDistance;
-    const lambda = wavelength;
-    const theta = Math.atan2(x, screenDist);
-    const delta = (Math.PI * d * Math.sin(theta)) / lambda;
-    return Math.cos(delta) ** 2;
+  const baseDt = 0.016;
+
+  function step() {
+    const dt = baseDt * simSpeed;
+    if (!paused) { t += dt; }
+    draw();
+    animFrame = requestAnimationFrame(step);
   }
 
   function draw() {
     const ctx = canvas?.getContext('2d');
     if (!ctx) return;
-    const w = 600, h = 400;
-    ctx.clearRect(0, 0, w, h);
+    const W = 600, H = 400;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
 
-    const slitX = 150;
-    const screenX = 500;
-    const screenDist = screenX - slitX;
-
-    // Source
-    ctx.beginPath();
-    ctx.arc(30, 200, 10, 0, Math.PI * 2);
-    ctx.fillStyle = '#6366f1';
-    ctx.fill();
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('Quelle', 15, 230);
+    const lambda = wavelength * 1e-9; // nm to m
+    const d = slitDist * 1e-3; // mm to m
+    const barrierX = 150;
+    const screenX = 480;
+    const midY = 180;
+    const slitGap = 30;
 
     // Barrier with slits
-    ctx.fillStyle = '#374151';
-    ctx.fillRect(slitX - 5, 0, 10, 200 - slitDistance / 2 - 5);
-    ctx.fillRect(slitX - 5, 200 - slitDistance / 2 + 5, 10, slitDistance - 10);
-    ctx.fillRect(slitX - 5, 200 + slitDistance / 2 + 5, 10, 200 - slitDistance / 2 - 5);
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(barrierX, 0, 8, midY - slitGap / 2 - 3);
+    ctx.fillRect(barrierX, midY - slitGap / 2 + 3, 8, slitGap - 6);
+    ctx.fillRect(barrierX, midY + slitGap / 2 - 3, 8, H - midY - slitGap / 2 + 3);
 
-    // Wave animation from source to slits
-    if (!showParticles) {
-      for (let r = 20; r < slitX - 10; r += wavelength) {
-        const phase = (r + t * 2) % (wavelength * 3);
-        if (phase < wavelength) {
-          ctx.beginPath();
-          ctx.arc(30, 200, r, -Math.PI / 4, Math.PI / 4);
-          ctx.strokeStyle = `rgba(99, 102, 241, ${0.5 * (1 - r / slitX)})`;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
-      }
-
-      // Interference pattern (waves from two slits)
-      for (let x = slitX + 10; x < screenX; x += 4) {
-        for (let y = 50; y < 350; y += 4) {
-          const d1 = Math.sqrt((x - slitX) ** 2 + (y - (200 - slitDistance / 2)) ** 2);
-          const d2 = Math.sqrt((x - slitX) ** 2 + (y - (200 + slitDistance / 2)) ** 2);
-          const phase1 = Math.sin((2 * Math.PI * d1) / wavelength - t * 3);
-          const phase2 = Math.sin((2 * Math.PI * d2) / wavelength - t * 3);
-          const amp = (phase1 + phase2) / 2;
-          const alpha = Math.abs(amp) * 0.4;
-          ctx.fillStyle = amp > 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(239, 68, 68, ${alpha * 0.5})`;
-          ctx.fillRect(x, y, 4, 4);
+    // Wave animation from slits
+    const waveColor = `hsl(${(700 - wavelength) / 300 * 270}, 80%, 60%)`;
+    ctx.globalAlpha = 0.3;
+    for (let slit = -1; slit <= 1; slit += 2) {
+      const sy = midY + slit * slitGap / 2;
+      for (let r = 10; r < 350; r += 15) {
+        const phase = r - t * 100 * simSpeed;
+        if (Math.sin(phase * 0.2) > 0) {
+          ctx.beginPath(); ctx.arc(barrierX + 8, sy, r, -Math.PI / 3, Math.PI / 3);
+          ctx.strokeStyle = waveColor; ctx.lineWidth = 1; ctx.stroke();
         }
       }
     }
+    ctx.globalAlpha = 1;
 
-    // Screen
+    // Interference pattern on screen
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(screenX, 20, 30, 360);
-
-    // Intensity pattern on screen
-    for (let y = 20; y < 380; y++) {
-      const yOffset = y - 200;
-      const intensity = intensityAt(yOffset, screenDist);
-      if (showParticles) {
-        // Particle dots
-      } else {
-        ctx.fillStyle = `rgba(99, 102, 241, ${intensity})`;
-        ctx.fillRect(screenX, y, 30, 1);
-      }
-    }
-
-    // Particle hits
-    if (showParticles) {
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(screenX + 15, 200 + p.x, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(99, 102, 241, 0.8)`;
-        ctx.fill();
-      });
-
-      // Fire new particle randomly
-      if (Math.random() < 0.1) {
-        const yOff = (Math.random() - 0.5) * 300;
-        const prob = intensityAt(yOff, screenDist);
-        if (Math.random() < prob) {
-          particles = [...particles.slice(-500), { x: yOff, intensity: prob }];
-          particleCount++;
-        }
-      }
+    ctx.fillRect(screenX, 0, 100, H);
+    for (let py = 0; py < H; py++) {
+      const y = (py - midY) * 0.001; // position on screen in m (scaled)
+      const theta = Math.atan2(y, screenDist);
+      const pathDiff = d * Math.sin(theta);
+      const phase = 2 * Math.PI * pathDiff / lambda;
+      const intensity = Math.cos(phase / 2) ** 2;
+      const hue = (700 - wavelength) / 300 * 270;
+      ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${intensity})`;
+      ctx.fillRect(screenX, py, 100, 1);
     }
 
     // Labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('Spalt 1', slitX - 30, 200 - slitDistance / 2 - 10);
-    ctx.fillText('Spalt 2', slitX - 30, 200 + slitDistance / 2 + 20);
-    ctx.fillText('Schirm', screenX + 5, 15);
-    if (showParticles) ctx.fillText(`Teilchen: ${particleCount}`, 20, 380);
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif';
+    ctx.fillText('Quelle', 20, midY + 4);
+    ctx.fillText('Spalt', barrierX - 5, 15);
+    ctx.fillText('Schirm', screenX + 30, 15);
 
-    t += 0.5;
-    animFrame = requestAnimationFrame(draw);
+    // Source
+    ctx.beginPath(); ctx.arc(50, midY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = waveColor; ctx.fill();
+
+    // Incoming waves
+    ctx.globalAlpha = 0.2;
+    for (let x = 60; x < barrierX; x += 20) {
+      const phase = x - t * 80;
+      if (Math.sin(phase * 0.15) > 0) {
+        ctx.beginPath(); ctx.moveTo(x, midY - 60); ctx.lineTo(x, midY + 60);
+        ctx.strokeStyle = waveColor; ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    // Maxima labels
+    ctx.fillStyle = '#e2e8f0'; ctx.font = '10px monospace';
+    for (let n = -3; n <= 3; n++) {
+      const thetaN = Math.asin(n * lambda / d);
+      if (isNaN(thetaN)) continue;
+      const yScreen = midY + Math.tan(thetaN) * (screenX - barrierX) * 3;
+      if (yScreen > 10 && yScreen < H - 60) {
+        ctx.fillText(`n=${n}`, screenX + 105, yScreen + 3);
+      }
+    }
+
+    // Measurements
+    ctx.fillStyle = '#94a3b8'; ctx.font = '12px monospace';
+    ctx.fillText(`d = ${slitDist.toFixed(2)} mm`, 20, 25);
+    ctx.fillText(`λ = ${wavelength} nm`, 20, 42);
+    ctx.fillText(`L = ${screenDist.toFixed(1)} m`, 20, 59);
+    const theta1 = Math.asin(lambda / d);
+    ctx.fillText(`θ₁ = ${(theta1 * 180 / Math.PI).toFixed(2)}°`, 20, 76);
+
+    // Formula panel
+    ctx.fillStyle = 'rgba(15,23,42,0.85)'; ctx.fillRect(0, H - 50, W, 50);
+    ctx.fillStyle = '#e2e8f0'; ctx.font = '13px monospace';
+    ctx.fillText(`d·sin(θ) = n·λ → ${slitDist.toFixed(2)}mm · sin(θ) = n · ${wavelength}nm`, 10, H - 30);
+    ctx.fillText(`Maxima bei θ₁ = ${(theta1 * 180 / Math.PI).toFixed(2)}°`, 10, H - 12);
+
+    if (paused) {
+      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(0, 0, W, H - 50);
+      ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('⏸ PAUSIERT', W / 2, H / 2); ctx.textAlign = 'start';
+    }
   }
 
-  function reset() {
-    particles = [];
-    particleCount = 0;
-  }
-
-  onMount(() => {
-    canvas.width = 600;
-    canvas.height = 400;
-    draw();
-    return () => cancelAnimationFrame(animFrame);
-  });
+  onMount(() => { canvas.width = 600; canvas.height = 400; step(); return () => cancelAnimationFrame(animFrame); });
 </script>
 
 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
   <canvas bind:this={canvas} class="w-full max-w-[600px] mx-auto block rounded-lg bg-slate-900 mb-4" style="aspect-ratio: 3/2;"></canvas>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-    <label class="flex flex-col gap-1">
-      <span class="text-sm text-slate-400">Spaltabstand: {slitDistance}px</span>
-      <input type="range" min="10" max="100" bind:value={slitDistance} class="accent-indigo-500" />
-    </label>
-    <label class="flex flex-col gap-1">
-      <span class="text-sm text-slate-400">Wellenlänge: {wavelength}px</span>
-      <input type="range" min="5" max="50" bind:value={wavelength} class="accent-indigo-500" />
-    </label>
-    <label class="flex items-center gap-2">
-      <input type="checkbox" bind:checked={showParticles} onchange={reset} class="accent-indigo-500" />
-      <span class="text-sm text-slate-400">Teilchen-Modus</span>
-    </label>
-    {#if showParticles}
-      <button onclick={reset} class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium transition-colors text-sm">
-        ↺ Reset Teilchen
-      </button>
-    {/if}
+  <div class="flex flex-wrap gap-3 justify-center mb-4">
+    <button onclick={()=>paused=!paused} class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-medium transition-colors">{paused?'▶ Weiter':'⏸ Pause'}</button>
+  </div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl mx-auto">
+    <label class="flex flex-col gap-1"><span class="text-sm text-blue-400">Spaltabstand: {slitDist.toFixed(2)} mm</span><input type="range" min="0.01" max="0.5" step="0.01" bind:value={slitDist} class="accent-blue-500" /></label>
+    <label class="flex flex-col gap-1"><span class="text-sm text-yellow-400">λ: {wavelength} nm</span><input type="range" min="380" max="750" step="10" bind:value={wavelength} class="accent-yellow-500" /></label>
+    <label class="flex flex-col gap-1"><span class="text-sm text-slate-400">Schirmabstand: {screenDist.toFixed(1)} m</span><input type="range" min="0.5" max="5" step="0.1" bind:value={screenDist} class="accent-slate-400" /></label>
+    <label class="flex flex-col gap-1"><span class="text-sm text-slate-400">Tempo: {simSpeed===0.25?'¼×':simSpeed===0.5?'½×':simSpeed===1?'1×':'2×'}</span><input type="range" min="0.25" max="2" step="0.25" bind:value={simSpeed} class="accent-indigo-500" /></label>
   </div>
 </div>
